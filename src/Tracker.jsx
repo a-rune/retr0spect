@@ -970,7 +970,8 @@ export default function RevisionTracker() {
   const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   const allCourses = ALL_COURSES_ORDERED;
-  const visibleCount = allCourses.length - hiddenCourseIds.size;
+  const visibleCourses = allCourses.filter((c) => !hiddenCourseIds.has(c.id));
+  const visibleCount = visibleCourses.length;
 
   const setCourseHidden = (id, hidden) => {
     setHiddenCourseIds((prev) => {
@@ -1001,9 +1002,9 @@ export default function RevisionTracker() {
     return true;
   });
 
-  const totalTopics = allCourses.reduce((a, c) => a + c.topics.length, 0);
-  const totalTheory = allCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.theory || 0), 0), 0);
-  const totalPPQ = allCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.ppq || 0), 0), 0);
+  const totalTopics = visibleCourses.reduce((a, c) => a + c.topics.length, 0);
+  const totalTheory = visibleCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.theory || 0), 0), 0);
+  const totalPPQ = visibleCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.ppq || 0), 0), 0);
   const overallTheory = totalTopics ? Math.round(totalTheory / totalTopics) : 0;
   const overallPPQ = totalTopics ? Math.round(totalPPQ / totalTopics) : 0;
   const overall = Math.round((overallTheory + overallPPQ) / 2);
@@ -1031,7 +1032,9 @@ export default function RevisionTracker() {
             <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, background: "linear-gradient(135deg, #818cf8, #f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Part II CST — Revision Tracker
             </h1>
-            <p style={{ fontSize: 10, color: "#475569", margin: "4px 0 0", letterSpacing: 1, textTransform: "uppercase" }}>Cambridge 2025–26 · {allCourses.length} Courses · {totalTopics} Topics</p>
+            <p style={{ fontSize: 10, color: "#475569", margin: "4px 0 0", letterSpacing: 1, textTransform: "uppercase" }}>
+              Cambridge 2025–26 · {visibleCount === allCourses.length ? `${allCourses.length} courses` : `${visibleCount} of ${allCourses.length} courses`} · {totalTopics} topics in selection
+            </p>
           </div>
           <button onClick={resetAll} style={{ fontSize: 9, background: "none", border: "1px solid #1e293b", color: "#475569", borderRadius: 4, padding: "4px 10px", cursor: "pointer" }}>
             Reset All
