@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import PpqBankView from "./PpqBankView.jsx";
+import { emptyPpqData, ppqDataFromParsed } from "./ppqStorage.js";
 import { TRIPOS_QUESTIONS_URL } from "./ppqUtils.js";
 
 const STORAGE_KEY = "revision-tracker-data";
@@ -932,7 +933,7 @@ export default function RevisionTracker() {
   const [pickerSearch, setPickerSearch] = useState("");
   const pickerWrapRef = useRef(null);
   const [mainView, setMainView] = useState("topics");
-  const [ppqDone, setPpqDone] = useState({});
+  const [ppqData, setPpqData] = useState(() => emptyPpqData());
   const [triposQuestions, setTriposQuestions] = useState(null);
   const [triposError, setTriposError] = useState(null);
   const [triposLoading, setTriposLoading] = useState(false);
@@ -947,12 +948,10 @@ export default function RevisionTracker() {
           if (Array.isArray(parsed.hiddenIds)) {
             setHiddenCourseIds(new Set(parsed.hiddenIds.filter((id) => ALL_COURSES_ORDERED.some((c) => c.id === id))));
           }
-          if (parsed.ppqDone && typeof parsed.ppqDone === "object") {
-            setPpqDone(parsed.ppqDone);
-          }
         } else {
           setTopicData(parsed);
         }
+        setPpqData(ppqDataFromParsed(parsed));
       }
       setLoaded(true);
     })();
@@ -963,9 +962,9 @@ export default function RevisionTracker() {
     persistStoredData({
       topics: topicData,
       hiddenIds: Array.from(hiddenCourseIds),
-      ppqDone,
+      ppqData,
     });
-  }, [topicData, hiddenCourseIds, ppqDone, loaded]);
+  }, [topicData, hiddenCourseIds, ppqData, loaded]);
 
   useEffect(() => {
     if (mainView !== "ppq") return;
@@ -1050,7 +1049,7 @@ export default function RevisionTracker() {
   const resetAll = () => {
     if (confirm("Reset all progress? This cannot be undone.")) {
       setTopicData({});
-      setPpqDone({});
+      setPpqData(emptyPpqData());
     }
   };
 
@@ -1334,8 +1333,8 @@ export default function RevisionTracker() {
           <div style={{ marginTop: 20 }}>
             <PpqBankView
               visibleCourses={visibleCourses}
-              ppqDone={ppqDone}
-              setPpqDone={setPpqDone}
+              ppqData={ppqData}
+              setPpqData={setPpqData}
               triposQuestions={triposQuestions}
               triposError={triposError}
               triposLoading={triposLoading}

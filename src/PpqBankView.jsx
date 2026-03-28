@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getQuestionsForCourse } from "./triposTopicMap";
-import { newAttemptId, paperStorageKey } from "./ppqStorage";
+import { newAttemptId, paperStorageKey, ppqDataFromParsed } from "./ppqStorage";
 import { formatDuration, normalizeSolutionUrl, pastPaperPdfUrl, stableQuestionKey } from "./ppqUtils";
 
 function groupQuestionsByPaper(qs) {
@@ -269,14 +269,22 @@ export default function PpqBankView({ visibleCourses, ppqData, setPpqData, tripo
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
-        const incoming = data.ppqData && typeof data.ppqData === "object" ? data.ppqData : data;
-        if (typeof incoming !== "object" || incoming === null) throw new Error("Invalid");
-        setPpqData((prev) => ({
-          paperNotes: { ...prev.paperNotes, ...(incoming.paperNotes || {}) },
-          questions: { ...prev.questions, ...(incoming.questions || {}) },
-        }));
+        if (data.ppqData && typeof data.ppqData === "object") {
+          setPpqData((prev) => ({
+            paperNotes: { ...prev.paperNotes, ...(data.ppqData.paperNotes || {}) },
+            questions: { ...prev.questions, ...(data.ppqData.questions || {}) },
+          }));
+        } else if (data.ppqDone && typeof data.ppqDone === "object") {
+          const migrated = ppqDataFromParsed({ ppqDone: data.ppqDone });
+          setPpqData((prev) => ({
+            paperNotes: { ...prev.paperNotes, ...migrated.paperNotes },
+            questions: { ...prev.questions, ...migrated.questions },
+          }));
+        } else {
+          throw new Error("Invalid");
+        }
       } catch {
-        alert("Could not import: expected JSON with ppqData { paperNotes, questions }.");
+        alert("Could not import: use export format, or legacy { ppqDone }.");
       }
     };
     reader.readAsText(file);
