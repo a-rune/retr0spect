@@ -16,3 +16,11 @@ export function stableQuestionKey(q) {
 
 export const TRIPOS_QUESTIONS_URL =
   "https://raw.githubusercontent.com/olifog/tripospro/main/questions.json";
+
+export function formatDuration(sec) {
+  if (sec == null || Number.isNaN(sec) || sec < 0) return "—";
+  const s = Math.floor(sec);
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${String(r).padStart(2, "0")}`;
+}
