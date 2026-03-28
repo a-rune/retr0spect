@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+<<<<<<< Updated upstream:src/Tracker.jsx
 import PpqBankView from "./PpqBankView.jsx";
 import { emptyPpqData, ppqDataFromParsed } from "./ppqStorage.js";
 import { TRIPOS_QUESTIONS_URL } from "./ppqUtils.js";
+=======
+import type { Course, CourseWithTerm, TopicData, TriposQuestion } from "./types";
+import type { PpqData } from "./ppqStorage";
+import PpqBankView from "./PpqBankView";
+import { emptyPpqData, ppqDataFromParsed } from "./ppqStorage";
+import { TRIPOS_QUESTIONS_URL } from "./ppqUtils";
+import TodayView from "./TodayView";
+import { currentStreak, dailyLogFromParsed, daysWithLogsCount, emptyDailyLog } from "./dailyLog";
+import ExportDataView from "./ExportDataView";
+import { emptyCoursePpq, migratePerTopicPpqToCourse, normalizeTopicData, parseCoursePpqFromBlob } from "./coursePpq";
+>>>>>>> Stashed changes:src/Tracker.tsx
 
 const STORAGE_KEY = "revision-tracker-data";
 
@@ -687,7 +699,20 @@ const ALL_COURSES_ORDERED = Object.entries(COURSES_DATA).flatMap(([term, { cours
   courses.map((c) => ({ ...c, term }))
 );
 
+<<<<<<< Updated upstream:src/Tracker.jsx
 const getStatusColor = (theory, ppq) => {
+=======
+const VALID_COURSE_IDS = new Set(ALL_COURSES_ORDERED.map((c) => c.id));
+
+interface StatusColor {
+  bg: string;
+  border: string;
+  text: string;
+  label: string;
+}
+
+const getStatusColor = (theory: number, ppq: number): StatusColor => {
+>>>>>>> Stashed changes:src/Tracker.tsx
   const avg = (theory + ppq) / 2;
   if (avg >= 80) return { bg: "#0a2e1a", border: "#16a34a", text: "#4ade80", label: "Strong" };
   if (avg >= 50) return { bg: "#1a2400", border: "#a3a316", text: "#d4de4a", label: "OK" };
@@ -731,10 +756,23 @@ function notesFromTopicData(td) {
   return "";
 }
 
+<<<<<<< Updated upstream:src/Tracker.jsx
 const TopicRow = ({ topic, topicIdx, courseId, data, updateTopic }) => {
+=======
+interface TopicRowProps {
+  topic: string;
+  topicIdx: number;
+  courseId: string;
+  data: TopicData | undefined;
+  coursePpq: number;
+  updateTopic: (courseId: string, topicIdx: number, val: TopicData) => void;
+}
+
+const TopicRow = ({ topic, topicIdx, courseId, data, coursePpq, updateTopic }: TopicRowProps) => {
+>>>>>>> Stashed changes:src/Tracker.tsx
   const [notesOpen, setNotesOpen] = useState(false);
-  const td = data || { theory: 0, ppq: 0 };
-  const status = getStatusColor(td.theory, td.ppq);
+  const td = data || { theory: 0 };
+  const status = getStatusColor(td.theory, coursePpq);
   const notesText = notesFromTopicData(td);
   const firstLine = notesText.trim().split(/\r?\n/).find((l) => l.trim()) || "";
   const preview = firstLine.length > 52 ? `${firstLine.slice(0, 52)}…` : firstLine;
@@ -758,7 +796,7 @@ const TopicRow = ({ topic, topicIdx, courseId, data, updateTopic }) => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1.6fr) 160px 160px 50px minmax(0, 1fr)",
+          gridTemplateColumns: "minmax(0, 1.6fr) 160px 50px minmax(0, 1fr)",
           gap: 8,
           padding: "6px 10px",
           alignItems: "center",
@@ -768,7 +806,6 @@ const TopicRow = ({ topic, topicIdx, courseId, data, updateTopic }) => {
           {topic}
         </span>
         <ProgressBar value={td.theory} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, theory: v })} color="#818cf8" label="Theory" />
-        <ProgressBar value={td.ppq} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, ppq: v })} color="#f472b6" label="PPQ" />
         <span style={{ fontSize: 9, color: status.text, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 0.5 }}>{status.label}</span>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, minWidth: 0 }}>
           <button
@@ -821,20 +858,32 @@ const TopicRow = ({ topic, topicIdx, courseId, data, updateTopic }) => {
   );
 };
 
+<<<<<<< Updated upstream:src/Tracker.jsx
 const CourseCard = ({ course, topicData, updateTopic, isExpanded, toggleExpand }) => {
+=======
+interface CourseCardProps {
+  course: CourseWithTerm;
+  topicData: Record<string, TopicData>;
+  coursePpqVal: number;
+  onCoursePpqChange: (courseId: string, v: number) => void;
+  updateTopic: (courseId: string, topicIdx: number, val: TopicData) => void;
+  isExpanded: boolean;
+  toggleExpand: () => void;
+}
+
+const CourseCard = ({ course, topicData, coursePpqVal, onCoursePpqChange, updateTopic, isExpanded, toggleExpand }: CourseCardProps) => {
+>>>>>>> Stashed changes:src/Tracker.tsx
   const topics = course.topics;
   const progress = topics.map((_, i) => {
-    const td = topicData?.[`${course.id}_${i}`] || { theory: 0, ppq: 0 };
-    return (td.theory + td.ppq) / 2;
+    const td = topicData?.[`${course.id}_${i}`] || { theory: 0 };
+    return (td.theory + coursePpqVal) / 2;
   });
   const avg = topics.length ? progress.reduce((a, b) => a + b, 0) / topics.length : 0;
   const status = getStatusColor(avg, avg);
   const theoryAvg = topics.length
     ? topics.reduce((a, _, i) => a + (topicData?.[`${course.id}_${i}`]?.theory || 0), 0) / topics.length
     : 0;
-  const ppqAvg = topics.length
-    ? topics.reduce((a, _, i) => a + (topicData?.[`${course.id}_${i}`]?.ppq || 0), 0) / topics.length
-    : 0;
+  const ppqAvg = coursePpqVal;
 
   return (
     <div
@@ -875,7 +924,7 @@ const CourseCard = ({ course, topicData, updateTopic, isExpanded, toggleExpand }
         </div>
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 10, color: "#f472b6", fontWeight: 600 }}>{Math.round(ppqAvg)}%</div>
-          <div style={{ fontSize: 8, color: "#64748b" }}>PPQ</div>
+          <div style={{ fontSize: 8, color: "#64748b" }}>PPQ (course)</div>
         </div>
         <div
           style={{
@@ -894,8 +943,25 @@ const CourseCard = ({ course, topicData, updateTopic, isExpanded, toggleExpand }
         <div style={{ padding: "0 8px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
           <div
             style={{
+              padding: "8px 10px",
+              marginBottom: 4,
+              background: "#020617",
+              borderRadius: 6,
+              border: "1px solid #1e293b",
+            }}
+          >
+            <div style={{ fontSize: 9, color: "#64748b", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>PPQ confidence</div>
+            <ProgressBar
+              value={coursePpqVal}
+              onChange={(v) => onCoursePpqChange(course.id, v)}
+              color="#f472b6"
+              label="PPQ"
+            />
+          </div>
+          <div
+            style={{
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1.6fr) 160px 160px 50px minmax(0, 1fr)",
+              gridTemplateColumns: "minmax(0, 1.6fr) 160px 50px minmax(0, 1fr)",
               gap: 8,
               padding: "4px 10px",
               fontSize: 9,
@@ -906,13 +972,20 @@ const CourseCard = ({ course, topicData, updateTopic, isExpanded, toggleExpand }
             }}
           >
             <span>Topic</span>
-            <span>Theory Progress</span>
-            <span>PPQ Progress</span>
+            <span>Theory</span>
             <span style={{ textAlign: "center" }}>Status</span>
             <span>Notes & links</span>
           </div>
           {topics.map((t, i) => (
-            <TopicRow key={i} topic={t} topicIdx={i} courseId={course.id} data={topicData?.[`${course.id}_${i}`]} updateTopic={updateTopic} />
+            <TopicRow
+              key={i}
+              topic={t}
+              topicIdx={i}
+              courseId={course.id}
+              data={topicData?.[`${course.id}_${i}`]}
+              coursePpq={coursePpqVal}
+              updateTopic={updateTopic}
+            />
           ))}
         </div>
       )}
@@ -931,17 +1004,28 @@ export default function RevisionTracker() {
   const [loaded, setLoaded] = useState(false);
   const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
+<<<<<<< Updated upstream:src/Tracker.jsx
   const pickerWrapRef = useRef(null);
   const [mainView, setMainView] = useState("topics");
   const [ppqData, setPpqData] = useState(() => emptyPpqData());
   const [triposQuestions, setTriposQuestions] = useState(null);
   const [triposError, setTriposError] = useState(null);
+=======
+  const pickerWrapRef = useRef<HTMLDivElement | null>(null);
+  const [mainView, setMainView] = useState<"topics" | "ppq" | "today" | "data">("topics");
+  const [dailyLog, setDailyLog] = useState(() => emptyDailyLog());
+  const [coursePpq, setCoursePpq] = useState(() => emptyCoursePpq());
+  const [ppqData, setPpqData] = useState<PpqData>(() => emptyPpqData());
+  const [triposQuestions, setTriposQuestions] = useState<TriposQuestion[] | null>(null);
+  const [triposError, setTriposError] = useState<string | null>(null);
+>>>>>>> Stashed changes:src/Tracker.tsx
   const [triposLoading, setTriposLoading] = useState(false);
   const [triposRetry, setTriposRetry] = useState(0);
 
   useEffect(() => {
     (async () => {
       const parsed = await loadStoredData();
+<<<<<<< Updated upstream:src/Tracker.jsx
       if (parsed && typeof parsed === "object") {
         if (parsed.topics != null && typeof parsed.topics === "object") {
           setTopicData(parsed.topics);
@@ -950,8 +1034,31 @@ export default function RevisionTracker() {
           }
         } else {
           setTopicData(parsed);
+=======
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const p = parsed as Record<string, unknown>;
+        let rawTopics: Record<string, TopicData & { ppq?: number }> = {};
+        if (p.topics != null && typeof p.topics === "object" && !Array.isArray(p.topics)) {
+          rawTopics = p.topics as Record<string, TopicData & { ppq?: number }>;
+        } else {
+          for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+            if (k === "hiddenIds" || k === "ppqData" || k === "dailyLog" || k === "topics" || k === "coursePpq") continue;
+            if (v && typeof v === "object" && !Array.isArray(v) && "theory" in (v as object)) {
+              rawTopics[k] = v as TopicData & { ppq?: number };
+            }
+          }
+>>>>>>> Stashed changes:src/Tracker.tsx
         }
+        setTopicData(normalizeTopicData(rawTopics));
+        if (Array.isArray(p.hiddenIds)) {
+          setHiddenCourseIds(
+            new Set((p.hiddenIds as unknown[]).filter((id): id is string => typeof id === "string" && ALL_COURSES_ORDERED.some((c) => c.id === id)))
+          );
+        }
+        const fromBlob = parseCoursePpqFromBlob(parsed, VALID_COURSE_IDS);
+        setCoursePpq(fromBlob ?? migratePerTopicPpqToCourse(rawTopics, VALID_COURSE_IDS));
         setPpqData(ppqDataFromParsed(parsed));
+        setDailyLog(dailyLogFromParsed(parsed));
       }
       setLoaded(true);
     })();
@@ -962,13 +1069,15 @@ export default function RevisionTracker() {
     persistStoredData({
       topics: topicData,
       hiddenIds: Array.from(hiddenCourseIds),
+      coursePpq,
       ppqData,
+      dailyLog,
     });
-  }, [topicData, hiddenCourseIds, ppqData, loaded]);
+  }, [topicData, hiddenCourseIds, coursePpq, ppqData, dailyLog, loaded]);
 
   // Single GET of static questions.json from GitHub (tripospro repo). No tripos.pro API; no repeated polling.
   useEffect(() => {
-    if (mainView !== "ppq") return;
+    if (mainView !== "ppq" && mainView !== "today") return;
     if (triposQuestions !== null) return;
     let cancelled = false;
     setTriposLoading(true);
@@ -1026,10 +1135,11 @@ export default function RevisionTracker() {
     if (filterType === "paper" && c.isModule) return false;
     if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.topics.some((t) => t.toLowerCase().includes(search.toLowerCase()))) return false;
     if (filterStatus !== "all") {
+      const cp = coursePpq[c.id] ?? 0;
       const avg = c.topics.length
         ? c.topics.reduce((a, _, i) => {
-            const td = topicData[`${c.id}_${i}`] || { theory: 0, ppq: 0 };
-            return a + (td.theory + td.ppq) / 2;
+            const td = topicData[`${c.id}_${i}`] || { theory: 0 };
+            return a + (td.theory + cp) / 2;
           }, 0) / c.topics.length
         : 0;
       if (filterStatus === "critical" && avg >= 20) return false;
@@ -1042,17 +1152,26 @@ export default function RevisionTracker() {
 
   const totalTopics = visibleCourses.reduce((a, c) => a + c.topics.length, 0);
   const totalTheory = visibleCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.theory || 0), 0), 0);
-  const totalPPQ = visibleCourses.reduce((a, c) => a + c.topics.reduce((b, _, i) => b + (topicData[`${c.id}_${i}`]?.ppq || 0), 0), 0);
+  const totalCoursePpq = visibleCourses.reduce((a, c) => a + (coursePpq[c.id] ?? 0), 0);
   const overallTheory = totalTopics ? Math.round(totalTheory / totalTopics) : 0;
-  const overallPPQ = totalTopics ? Math.round(totalPPQ / totalTopics) : 0;
+  const overallPPQ = visibleCourses.length ? Math.round(totalCoursePpq / visibleCourses.length) : 0;
   const overall = Math.round((overallTheory + overallPPQ) / 2);
 
   const resetAll = () => {
     if (confirm("Reset all progress? This cannot be undone.")) {
       setTopicData({});
+      setCoursePpq(emptyCoursePpq());
       setPpqData(emptyPpqData());
+      setDailyLog(emptyDailyLog());
     }
   };
+
+  const onCoursePpqChange = useCallback((courseId: string, v: number) => {
+    setCoursePpq((prev) => ({ ...prev, [courseId]: v }));
+  }, []);
+
+  const streakDays = currentStreak(dailyLog);
+  const daysLogged = daysWithLogsCount(dailyLog);
 
   const pickerCourses = ALL_COURSES_ORDERED.filter((c) => {
     if (!pickerSearch.trim()) return true;
@@ -1072,7 +1191,8 @@ export default function RevisionTracker() {
               Part II CST — Revision Tracker
             </h1>
             <p style={{ fontSize: 10, color: "#475569", margin: "4px 0 0", letterSpacing: 1, textTransform: "uppercase" }}>
-              Cambridge 2025–26 · {visibleCount === allCourses.length ? `${allCourses.length} courses` : `${visibleCount} of ${allCourses.length} courses`} · {totalTopics} topics in selection
+              Cambridge 2025–26 · {streakDays} day streak · {daysLogged} days logged ·{" "}
+              {visibleCount === allCourses.length ? `${allCourses.length} courses` : `${visibleCount} of ${allCourses.length} courses`} · {totalTopics} topics in selection
             </p>
           </div>
           <button onClick={resetAll} style={{ fontSize: 9, background: "none", border: "1px solid #1e293b", color: "#475569", borderRadius: 4, padding: "4px 10px", cursor: "pointer" }}>
@@ -1081,10 +1201,21 @@ export default function RevisionTracker() {
         </div>
 
         <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+<<<<<<< Updated upstream:src/Tracker.jsx
           {[
             { id: "topics", label: "Topics & theory" },
             { id: "ppq", label: "PPQ bank (tripospro data)" },
           ].map((t) => (
+=======
+          {(
+            [
+              { id: "topics" as const, label: "Topics & theory" },
+              { id: "today" as const, label: "Today" },
+              { id: "ppq" as const, label: "PPQ bank (tripospro data)" },
+              { id: "data" as const, label: "Export & backup" },
+            ] as const
+          ).map((t) => (
+>>>>>>> Stashed changes:src/Tracker.tsx
             <button
               key={t.id}
               type="button"
@@ -1319,7 +1450,16 @@ export default function RevisionTracker() {
         <div style={{ maxWidth: 1100, margin: "8px auto 0" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {filtered.map((c) => (
-            <CourseCard key={c.id} course={c} topicData={topicData} updateTopic={updateTopic} isExpanded={!!expanded[c.id]} toggleExpand={() => toggleExpand(c.id)} />
+            <CourseCard
+              key={c.id}
+              course={c}
+              topicData={topicData}
+              coursePpqVal={coursePpq[c.id] ?? 0}
+              onCoursePpqChange={onCoursePpqChange}
+              updateTopic={updateTopic}
+              isExpanded={!!expanded[c.id]}
+              toggleExpand={() => toggleExpand(c.id)}
+            />
           ))}
         </div>
         {!filtered.length && (
@@ -1329,6 +1469,27 @@ export default function RevisionTracker() {
         </>
         )}
       </div>
+
+        {mainView === "today" && (
+          <div style={{ marginTop: 20 }}>
+            <TodayView
+              allCourses={allCourses}
+              visibleCourses={visibleCourses}
+              dailyLog={dailyLog}
+              setDailyLog={setDailyLog}
+              setTopicData={setTopicData}
+              setCoursePpq={setCoursePpq}
+              setPpqData={setPpqData}
+              triposQuestions={triposQuestions}
+              triposLoading={triposLoading}
+              triposError={triposError}
+              onRetryTripos={() => {
+                setTriposError(null);
+                setTriposRetry((n) => n + 1);
+              }}
+            />
+          </div>
+        )}
 
         {mainView === "ppq" && (
           <div style={{ marginTop: 20 }}>
@@ -1343,6 +1504,24 @@ export default function RevisionTracker() {
                 setTriposError(null);
                 setTriposRetry((n) => n + 1);
               }}
+            />
+          </div>
+        )}
+
+        {mainView === "data" && (
+          <div style={{ marginTop: 20 }}>
+            <ExportDataView
+              validCourseIds={VALID_COURSE_IDS}
+              topicData={topicData}
+              coursePpq={coursePpq}
+              hiddenCourseIds={hiddenCourseIds}
+              ppqData={ppqData}
+              dailyLog={dailyLog}
+              setTopicData={setTopicData}
+              setCoursePpq={setCoursePpq}
+              setHiddenCourseIds={setHiddenCourseIds}
+              setPpqData={setPpqData}
+              setDailyLog={setDailyLog}
             />
           </div>
         )}

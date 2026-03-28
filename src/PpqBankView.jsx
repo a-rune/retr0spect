@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { getQuestionsForCourse } from "./triposTopicMap";
+<<<<<<< Updated upstream:src/PpqBankView.jsx
 import { newAttemptId, paperStorageKey, ppqDataFromParsed } from "./ppqStorage";
+=======
+import { newAttemptId, paperStorageKey, ppqDataFromParsed, type PpqAttempt, type PpqData } from "./ppqStorage";
+import { PpqStopwatch } from "./PpqStopwatch";
+>>>>>>> Stashed changes:src/PpqBankView.tsx
 import { formatDuration, normalizeSolutionUrl, pastPaperPdfUrl, ppqCellVisualStyle, stableQuestionKey } from "./ppqUtils";
 
 function groupQuestionsByPaper(qs) {
@@ -33,6 +38,7 @@ function getLatestAttempt(attempts) {
   return [...attempts].sort((a, b) => new Date(b.at) - new Date(a.at))[0];
 }
 
+<<<<<<< Updated upstream:src/PpqBankView.jsx
 function Stopwatch({ onLogAttempt }) {
   const [accum, setAccum] = useState(0);
   const [runStart, setRunStart] = useState(null);
@@ -110,6 +116,9 @@ function Stopwatch({ onLogAttempt }) {
 }
 
 const btnSm = {
+=======
+const btnSm: CSSProperties = {
+>>>>>>> Stashed changes:src/PpqBankView.tsx
   fontSize: 10,
   padding: "4px 10px",
   background: "#1e293b",
@@ -119,6 +128,7 @@ const btnSm = {
   cursor: "pointer",
 };
 
+<<<<<<< Updated upstream:src/PpqBankView.jsx
 const inpSm = {
   fontSize: 10,
   padding: "6px 8px",
@@ -131,6 +141,17 @@ const inpSm = {
 };
 
 function QuestionDetailPanel({ q, qKey, qState, onAddAttempt, onDeleteAttempt }) {
+=======
+interface QuestionDetailPanelProps {
+  q: TriposQuestion;
+  qKey: string;
+  qState: { attempts: PpqAttempt[] } | undefined;
+  onAddAttempt: (questionKey: string, attempt: PpqAttempt) => void;
+  onDeleteAttempt: (questionKey: string, id: string) => void;
+}
+
+function QuestionDetailPanel({ q, qKey, qState, onAddAttempt, onDeleteAttempt }: QuestionDetailPanelProps) {
+>>>>>>> Stashed changes:src/PpqBankView.tsx
   const pdfUrl = pastPaperPdfUrl(q.pdf);
   const solUrl = normalizeSolutionUrl(q.solutions);
   const label = `${q.year} · paper ${q.paper} · Q${q.question}`;
@@ -152,7 +173,7 @@ function QuestionDetailPanel({ q, qKey, qState, onAddAttempt, onDeleteAttempt })
         )}
         <span style={{ fontSize: 10, color: "#64748b" }}>{q.topic}</span>
       </div>
-      <Stopwatch
+      <PpqStopwatch
         onLogAttempt={(att) =>
           onAddAttempt(qKey, {
             id: newAttemptId(),
@@ -338,6 +359,9 @@ export default function PpqBankView({ visibleCourses, ppqData, setPpqData, tripo
           <span style={{ marginRight: 8 }}>Import merge</span>
           <input type="file" accept="application/json" onChange={importPpq} style={{ fontSize: 10 }} />
         </label>
+        <span style={{ fontSize: 9, color: "#475569" }} title="Topics, Today log, and course visibility live in the Export & backup tab">
+          · Full JSON (everything) → Export & backup tab
+        </span>
         <span style={{ fontSize: 9, color: "#475569" }}>One GitHub fetch ·</span>
         <span style={{ fontSize: 9, color: "#64748b", marginLeft: 4 }}>Key</span>
         {[

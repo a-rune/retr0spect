@@ -14,6 +14,14 @@ export function stableQuestionKey(q) {
   return `${q.year}|${q.paper}|${q.question}|${q.topic}`;
 }
 
+/** Human label from a `stableQuestionKey` string (no JSON lookup). */
+export function formatQuestionKeyForDisplay(key: string): string {
+  const p = key.split("|");
+  if (p.length < 4) return key;
+  const [year, paper, qn, topic] = p;
+  return `${year} · paper ${paper} · Q${qn} · ${topic}`;
+}
+
 /** Static JSON from the tripospro GitHub repo (CDN). Loaded at most once per browser session — not tripos.pro and not a polling loop. */
 export const TRIPOS_QUESTIONS_URL =
   "https://raw.githubusercontent.com/olifog/tripospro/main/questions.json";
