@@ -1,21 +1,8 @@
-hehehehaw
-
-just quick vibecoded retrospective timetable bcs excel file again is kinda pain
+Retrospective timetable with progress trackers.
 
 
-will add things as I see fit, open to suggestions
+Data stored on browser cache.
 
 
-dual weilding this with tripos.pro, might fit that in too at some point
+In the future, may integrate with [tripos.pro](tripos.pro, Oli's website)
 
-
-uhh
-
-
-is it spelt wielding or weilding
-
-
-wielding probably better
-
-
-ok rambling over time to revise
