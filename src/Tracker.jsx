@@ -721,101 +721,99 @@ const ProgressBar = ({ value, onChange, color, label }) => {
   );
 };
 
-const LinkChip = ({ url, onRemove }) => {
-  let display;
-  try {
-    display = new URL(url).hostname.replace("www.", "");
-  } catch {
-    display = url.slice(0, 20);
-  }
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        background: "#1e293b",
-        borderRadius: 4,
-        padding: "2px 6px",
-        fontSize: 10,
-        color: "#60a5fa",
-        maxWidth: 150,
-      }}
-    >
-      <a href={url} target="_blank" rel="noreferrer" style={{ color: "#60a5fa", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        {display}
-      </a>
-      <button onClick={onRemove} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: 0, fontSize: 12, lineHeight: 1 }}>×</button>
-    </span>
-  );
-};
+function notesFromTopicData(td) {
+  if (!td) return "";
+  if (typeof td.notes === "string") return td.notes;
+  if (Array.isArray(td.links) && td.links.length) return td.links.join("\n");
+  return "";
+}
 
 const TopicRow = ({ topic, topicIdx, courseId, data, updateTopic }) => {
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [linkVal, setLinkVal] = useState("");
-  const td = data || { theory: 0, ppq: 0, links: [] };
+  const [notesOpen, setNotesOpen] = useState(false);
+  const td = data || { theory: 0, ppq: 0 };
   const status = getStatusColor(td.theory, td.ppq);
+  const notesText = notesFromTopicData(td);
+  const firstLine = notesText.trim().split(/\r?\n/).find((l) => l.trim()) || "";
+  const preview = firstLine.length > 52 ? `${firstLine.slice(0, 52)}…` : firstLine;
 
-  const addLink = () => {
-    if (linkVal.trim()) {
-      updateTopic(courseId, topicIdx, { ...td, links: [...(td.links || []), linkVal.trim()] });
-      setLinkVal("");
-      setShowLinkInput(false);
-    }
-  };
-
-  const removeLink = (i) => {
-    const nl = [...(td.links || [])];
-    nl.splice(i, 1);
-    updateTopic(courseId, topicIdx, { ...td, links: nl });
+  const setNotes = (text) => {
+    const next = { ...td, notes: text };
+    delete next.links;
+    updateTopic(courseId, topicIdx, next);
   };
 
   return (
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1.6fr) 160px 160px 50px minmax(0, 1fr)",
-        gap: 8,
-        padding: "6px 10px",
-        alignItems: "center",
         borderLeft: `3px solid ${status.border}`,
         background: status.bg + "40",
         borderRadius: "0 4px 4px 0",
         transition: "all 0.3s",
+        overflow: "hidden",
       }}
     >
-      <span style={{ fontSize: 12, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={topic}>
-        {topic}
-      </span>
-      <ProgressBar value={td.theory} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, theory: v })} color="#818cf8" label="Theory" />
-      <ProgressBar value={td.ppq} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, ppq: v })} color="#f472b6" label="PPQ" />
-      <span style={{ fontSize: 9, color: status.text, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 0.5 }}>{status.label}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap", minWidth: 0 }}>
-        {(td.links || []).map((l, i) => (
-          <LinkChip key={i} url={l} onRemove={() => removeLink(i)} />
-        ))}
-        {showLinkInput ? (
-          <span style={{ display: "inline-flex", gap: 2 }}>
-            <input
-              value={linkVal}
-              onChange={(e) => setLinkVal(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addLink()}
-              placeholder="https://..."
-              autoFocus
-              style={{ width: 120, fontSize: 10, padding: "2px 4px", background: "#0f172a", border: "1px solid #334155", borderRadius: 3, color: "#e2e8f0", outline: "none" }}
-            />
-            <button onClick={addLink} style={{ fontSize: 10, background: "#1e3a5f", border: "none", color: "#60a5fa", borderRadius: 3, cursor: "pointer", padding: "2px 5px" }}>+</button>
-            <button onClick={() => setShowLinkInput(false)} style={{ fontSize: 10, background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: "2px 3px" }}>×</button>
-          </span>
-        ) : (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1.6fr) 160px 160px 50px minmax(0, 1fr)",
+          gap: 8,
+          padding: "6px 10px",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ fontSize: 12, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={topic}>
+          {topic}
+        </span>
+        <ProgressBar value={td.theory} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, theory: v })} color="#818cf8" label="Theory" />
+        <ProgressBar value={td.ppq} onChange={(v) => updateTopic(courseId, topicIdx, { ...td, ppq: v })} color="#f472b6" label="PPQ" />
+        <span style={{ fontSize: 9, color: status.text, fontWeight: 700, textAlign: "center", textTransform: "uppercase", letterSpacing: 0.5 }}>{status.label}</span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, minWidth: 0 }}>
           <button
-            onClick={() => setShowLinkInput(true)}
-            style={{ fontSize: 10, background: "none", border: "1px dashed #334155", color: "#475569", borderRadius: 3, cursor: "pointer", padding: "1px 6px", whiteSpace: "nowrap" }}
+            type="button"
+            onClick={() => setNotesOpen((o) => !o)}
+            style={{
+              fontSize: 10,
+              textAlign: "left",
+              background: notesOpen ? "#1e293b" : "none",
+              border: "1px solid #334155",
+              color: "#94a3b8",
+              borderRadius: 4,
+              cursor: "pointer",
+              padding: "4px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            + link
+            <span style={{ color: "#64748b", flexShrink: 0 }}>{notesOpen ? "▼" : "▶"}</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{notesOpen ? "Hide notes" : preview || "Notes & links"}</span>
           </button>
-        )}
+        </div>
       </div>
+      {notesOpen && (
+        <div style={{ padding: "0 10px 10px 10px" }}>
+          <textarea
+            value={notesText}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={"URLs (one per line), reminders, extra practice…\nExample: https://…\nDo more past paper Qs on X"}
+            rows={5}
+            style={{
+              width: "100%",
+              resize: "vertical",
+              minHeight: 88,
+              fontSize: 11,
+              lineHeight: 1.45,
+              padding: "8px 10px",
+              background: "#020617",
+              border: "1px solid #334155",
+              borderRadius: 6,
+              color: "#e2e8f0",
+              outline: "none",
+              fontFamily: "inherit",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -908,7 +906,7 @@ const CourseCard = ({ course, topicData, updateTopic, isExpanded, toggleExpand }
             <span>Theory Progress</span>
             <span>PPQ Progress</span>
             <span style={{ textAlign: "center" }}>Status</span>
-            <span>Resources</span>
+            <span>Notes & links</span>
           </div>
           {topics.map((t, i) => (
             <TopicRow key={i} topic={t} topicIdx={i} courseId={course.id} data={topicData?.[`${course.id}_${i}`]} updateTopic={updateTopic} />
