@@ -200,7 +200,7 @@ export default function RevisionTracker() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, background: "linear-gradient(135deg, #818cf8, #f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Retr0spect
+              Retr0spect - Part II CST Revision timetable
             </h1>
             <p style={{ fontSize: 10, color: "#475569", margin: "4px 0 0", letterSpacing: 1, textTransform: "uppercase" }}>
               Cambridge 2025–26 · {streakDays} day streak · {daysLogged} days logged ·{" "}
