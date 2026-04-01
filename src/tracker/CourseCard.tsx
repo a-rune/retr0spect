@@ -4,10 +4,10 @@ import type { CourseWithTerm, TopicData } from "../types";
 type StatusStyle = { bg: string; border: string; text: string; label: string };
 
 export function getStatusColor(theory: number, ppq: number): StatusStyle {
-  const avg = (theory + ppq) / 2;
-  if (avg >= 80) return { bg: "#0a2e1a", border: "#16a34a", text: "#4ade80", label: "Strong" };
-  if (avg >= 50) return { bg: "#1a2400", border: "#a3a316", text: "#d4de4a", label: "OK" };
-  if (avg >= 20) return { bg: "#2e1f0a", border: "#d97706", text: "#fbbf24", label: "Needs Work" };
+  // const avg = (theory + ppq) / 2;
+  if (theory >= 80) return { bg: "#0a2e1a", border: "#16a34a", text: "#4ade80", label: "Strong" };
+  if (theory >= 50) return { bg: "#1a2400", border: "#a3a316", text: "#d4de4a", label: "OK" };
+  if (theory >= 20) return { bg: "#2e1f0a", border: "#d97706", text: "#fbbf24", label: "Needs Work" };
   return { bg: "#2e0a0a", border: "#dc2626", text: "#f87171", label: "Critical" };
 }
 

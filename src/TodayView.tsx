@@ -20,7 +20,7 @@ import {
 } from "./dailyLog";
 
 const MS_DAY = 86400000;
-const THEORY_BUMP = 5;
+const THEORY_BUMP = 75;
 const PPQ_COURSE_BUMP = 5;
 
 const HEAT_BG = ["#0f172a", "#14532d", "#166534", "#22c55e", "#4ade80"];
@@ -520,7 +520,7 @@ export default function TodayView({
         <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
           {(
             [
-              { id: "theory" as const, label: "Theory revision", sub: "Topics tab · per topic +5%" },
+              { id: "theory" as const, label: "Theory revision", sub: `Topics tab · per topic +${THEORY_BUMP}%` },
               { id: "question" as const, label: "PPQ attempt", sub: "Question + PPQ bank / course PPQ" },
               { id: "note" as const, label: "Note only", sub: "No sync to other tabs" },
             ] as const
