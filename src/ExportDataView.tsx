@@ -151,6 +151,9 @@ export default function ExportDataView({
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <p style={{ fontSize: 11, color: "var(--cg-muted-dim)", margin: "0 0 16px", lineHeight: 1.55 }}>
+        GitHub repo if you want to contribute/customize: <a href="https://github.com/a-rune/retr0spect" target="_blank" rel="noopener noreferrer">https://github.com/a-rune/retr0spect</a>
+      </p>
+      <p style={{ fontSize: 11, color: "var(--cg-muted-dim)", margin: "0 0 16px", lineHeight: 1.55 }}>
         Single JSON backup for this app: topic sliders & notes, which courses are hidden, PPQ attempts & paper notes, and the Today log / heatmap. Use{" "}
         <strong style={{ color: "var(--cg-muted)" }}>Export</strong> before reinstalling the browser or moving machines; use <strong style={{ color: "var(--cg-muted)" }}>Merge</strong> to pull in
         an older file or a PPQ-only export without wiping the rest.
